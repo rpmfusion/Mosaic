@@ -1,6 +1,6 @@
 Name:           Mosaic
 Version:        2.7
-Release:        0.3.b5%{?dist}
+Release:        0.3.b5%{?dist}.1
 Summary:        Web Browser
 
 Group:          Applications/Internet
@@ -69,7 +69,7 @@ install src/Mosaic $RPM_BUILD_ROOT%{_bindir}
 install -pm 0644 Mosaic.png $RPM_BUILD_ROOT%{_datadir}/pixmaps
 
 # Menu entry
-desktop-file-install %{SOURCE1} \
+desktop-file-install %{SOURCE1} --vendor '' \
     --dir=$RPM_BUILD_ROOT%{_datadir}/applications
 
 
@@ -87,6 +87,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Apr 24 2009 Lubomir Rintel <lkundrak@v3.sk> - 2.7-0.3.b5.1
+- Fix desktop file install on el5
+
 * Thu Apr 23 2009 Lubomir Rintel <lkundrak@v3.sk> - 2.7-0.3.b5
 - Grammar fixes
 - Fix buildrequires
