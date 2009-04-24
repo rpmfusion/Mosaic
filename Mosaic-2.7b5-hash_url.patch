@@ -1,0 +1,15 @@
+Render wikipedia.org correctly.
+Martin Nagy <mnagy@redhat.com>
+
+diff -up Mosaic-src/src/globalhist.c.hash_url Mosaic-src/src/globalhist.c
+--- Mosaic-src/src/globalhist.c.hash_url	2008-11-28 21:05:08.000000000 +0100
++++ Mosaic-src/src/globalhist.c	2008-11-28 21:09:56.000000000 +0100
+@@ -210,7 +210,7 @@ static int hash_url (char *url)
+   len = strlen (url);
+   val = 0;
+   for (i = 0; i < 10; i++)
+-    val += url[(i * val + 7) % len];
++    val += (unsigned char)url[(i * val + 7) % len];
+ 
+   return val % HASH_TABLE_SIZE;
+ }

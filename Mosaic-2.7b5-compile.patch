@@ -1,0 +1,541 @@
+Fix Mosaic 2.7b5 build (Fedora)
+Lubomir Rintel <lkundrak@v3.sk>
+
+configure.in
+	Detect and use shared libraries correctly
+	Set include path for correct Motif detection
+
+config.sub
+	Don't complain if the machine is already specified
+
+libhtmlw/HTML-PSformat.c
+	Use stdarg instead of ancient and discontinued vararg
+
+libnut/system.c
+libwww2/HTTCP.c
+src/gui-dialogs.c
+	Do not redefine error handling variables
+
+src/comment.c
+src/comment.h
+	Do not redundantly define variables in files including comment.h
+
+src/readPNG.c
+	Replace deprecated functions with current
+
+src/Makefile.in
+	Do not depend on GCC internal headers
+
+libnut/url-utils.c
+libnut/url-utils.h
+libwww2/HTInit.c
+	Don't redefine glibc's getline
+
+diff -up Mosaic-src/config.sub.compile Mosaic-src/config.sub
+--- Mosaic-src/config.sub.compile	1996-06-25 10:33:24.000000000 +0200
++++ Mosaic-src/config.sub	2009-03-29 16:31:24.014883456 +0200
+@@ -138,11 +138,6 @@ case $basic_machine in
+ 		| sparc)
+ 		basic_machine=$basic_machine-unknown
+ 		;;
+-	# Object if more than one company name word.
+-	*-*-*)
+-		echo Invalid configuration \`$1\': machine \`$basic_machine\' not recognized 1>&2
+-		exit 1
+-		;;
+ 	# Recognize the basic CPU types with company name.
+ 	vax-* | tahoe-* | i[345]86-* | i860-* | m68k-* | m68000-* | m88k-* \
+ 	      | sparc-* | ns32k-* | fx80-* | arm-* | c[123]* \
+@@ -592,6 +587,8 @@ case $basic_machine in
+ 	orion105)
+ 		basic_machine=clipper-highlevel
+ 		;;
++	*-*)
++		;;
+ 	*)
+ 		echo Invalid configuration \`$1\': machine \`$basic_machine\' not recognized 1>&2
+ 		exit 1
+diff -up Mosaic-src/configure.in.compile Mosaic-src/configure.in
+--- Mosaic-src/configure.in.compile	1996-07-11 03:34:40.000000000 +0200
++++ Mosaic-src/configure.in	2009-03-29 16:31:24.016883493 +0200
+@@ -119,6 +119,7 @@ AC_CHECK_LIB(Xmu, _XEditResCheckMessages
+ AC_CHECK_LIB(Xm, XmCreatePushButton, [
+ AC_DEFINE(MOTIF) 
+ LIBS="-lXm ${LIBS}"
++CPPFLAGS="${CPPFLAGS} -I/usr/include/Xm"
+ ])
+ 
+ dnl Checks for typedefs, structures, and compiler characteristics.
+@@ -144,189 +145,69 @@ dnl as smartly as possible. 
+ AC_MSG_CHECKING(for external software)
+ echo ""
+ 
+-AC_MSG_CHECKING(for jpeg software)
+-AC_ARG_WITH(jpegdir,
+-[  --with-jpegdir=DIR   the directory where the built jpeg library resides ],
++AC_ARG_WITH(jpeg,
++[  --with-jpeg=DIR   the directory where the built jpeg library resides ],
+ [
+-dnl We got a dir make sure we got the header and library
+ 
++dnl We got a dir make sure we got the header and library
+ if test -d ${withval} ; then
+-    if test -r ${withval}/libjpeg.a ; then
+-       LIBS="${withval}/libjpeg.a ${LIBS}"
+-    else
+-       if test -r ${withval}/lib/libjpeg.a ; then 
+-         LIBS="${withval}/lib/libjpeg.a ${LIBS}"
+-       else
+-	 AC_MSG_ERROR(Could not find libjpeg.a in ${withval})
+-       fi
+-    fi
+-
+     if test -r ${withval}/jpeglib.h ; then
+-	CPPFLAGS="${CPPFLAGS} -I${withval}"
++        CPPFLAGS="${CPPFLAGS} -I${withval}"
++        LDFLAGS="-L${withval} ${LDFLAGS}"
+     else
+-	if test -r ${withval}/include/jpeglib.h ; then
+-	    CPPFLAGS="${CPPFLAGS} -I${withval}/include"
+-	else
+-	    AC_MSG_ERROR(Could not find jpeglib.h in ${withval})
+-	fi
++        CPPFLAGS="${CPPFLAGS} -I${withval}/include"
++        LDFLAGS="-L${withval}/lib ${LDFLAGS}"
+     fi
+-else
+-    AC_MSG_RESULT(not)
+-    AC_MSG_ERROR(Couldn't find the specified jpeg dir: ${withval})
+ fi
+-dnl Now we think we got it so lets check 
+-    AC_TRY_LINK([#include<stdio.h>
+-		 #include "jpeglib.h"], 
+-		 [jpeg_read_raw_data(NULL, NULL, 0)], 
+-		 [AC_DEFINE(HAVE_JPEG)
+-		  AC_MSG_RESULT(found)],
+-		 [AC_MSG_RESULT(not found)
+-		  AC_MSG_ERROR(Couldn't find jpeg stuff in ${withval})])
+-],
+-[
+-    echo ""
+-    echo "Uh oh, you didn't include jpeg.  Doing this will greatly"
+-    echo "increase your surfing pleasure.  You can get it from these places:"
+-    echo "ftp://ftp.uu.net/graphics/jpeg/jpegsrc.v6a.tar.gz"
+-    echo "ftp://ftp.cs.wisc.edu/pub/ghost/jpegsrc.v6a.tar.gz"
+-    echo ""
+-    echo "If you go get it and build it, putting it into mosaic"
+-    echo "is as simple as doing this: "
+-    echo "./configure --with-jpegdir=/dir/where/you/installed/jpeg"
+-    echo ""
+-    echo "or take a look at the config script and edit the jpegdir field."
+-    echo "Then you just run:"
+-    echo "./config"
+-    echo ""
+-    echo "Would you like to configure to stop now so you can go get jpeg?"
+-    echo "(yes or no)" 
+-    read ans 
+-
+-    case "${ans}" in 
+-        "y" | "ye" | "yes") 
+-        exit 
+-        ;;
+-    esac
+-])
+ 
+-dnl Before we check for png lets make sure we can find libz
+-AC_MSG_CHECKING(for libz)
+-
+-dnl We need libz after libpng in the link line but we have to check it
+-dnl before we check libpng, this variable does the magic
+-lib_save=${LIBS}
++AC_CHECK_LIB(jpeg, jpeg_read_raw_data,
++    [AC_DEFINE(HAVE_JPEG)
++     LIBS="${LIBS} -ljpeg"],
++    [AC_MSG_ERROR(Couldn't find jpeg)])
++])
+ 
+-AC_ARG_WITH(zdir,
+-[  --with-zdir=DIR   the directory where the built z library resides ],
++AC_ARG_WITH(zlib,
++[  --with-zlib=DIR   the directory where the built z library resides ],
+ [
+-dnl We got a dir make sure we got the library
++
++dnl We got a dir make sure we got the header and library
+ if test -d ${withval} ; then
+-    if test -r ${withval}/libz.a ; then
+-       LIBS="${withval}/libz.a ${LIBS}"
+-       libz="${withval}/libz.a"
++    if test -r ${withval}/zlib.h ; then
++        CPPFLAGS="${CPPFLAGS} -I${withval}"
++        LDFLAGS="-L${withval} ${LDFLAGS}"
+     else
+-       if test -r ${withval}/lib/libz.a ; then 
+-         LIBS="${withval}/lib/libz.a ${LIBS}"
+-	 libz="${withval}/lib/libz.a"
+-       else
+-	 AC_MSG_ERROR(Could not find libz.a in ${withval})
+-       fi
++        CPPFLAGS="${CPPFLAGS} -I${withval}/include"
++        LDFLAGS="-L${withval}/lib ${LDFLAGS}"
+     fi
+-else
+-    AC_MSG_ERROR(Couldn't find the specified zlib dir: ${withval})
+ fi
+-dnl Now we think we got it so lets check 
+-   AC_TRY_LINK([#include<stdio.h>],
+-		 [inflate();], 
+-		 [AC_DEFINE(HAVE_PNG)
+-		  AC_MSG_RESULT(got it)
+-		  have_z="yes"],
+-		 [AC_MSG_RESULT(not found)
+-		  AC_MSG_ERROR(Couldn't find png stuff in ${withval})])
+-
+-],
+-[
+-AC_MSG_RESULT(not)
+ ])
+ 
+-LIBS=${lib_save}
+ 
+-if test "${have_z}" = "yes" ; then
+-AC_MSG_CHECKING(for png)
+-AC_ARG_WITH(pngdir,
+-    [  --with-pngdir=DIR   the directory where the built png library resides ],
+-    [
++# Check for PNG
++AC_ARG_WITH(png,
++[  --with-png=DIR   the directory where the built png library resides ],
++[
++
+ dnl We got a dir make sure we got the header and library
+-    if test -d ${withval} ; then
+-	if test -r ${withval}/libpng.a ; then
+-	    LIBS="${withval}/libpng.a ${libz} ${LIBS}"
+-	else
+-	    if test -r ${withval}/lib/libpng.a ; then 
+-		LIBS="${withval}/lib/libpng.a ${libz} ${LIBS}"
+-	    else
+-		AC_MSG_ERROR(Could not find libpng.a in ${withval})
+-	    fi
+-	fi
+-
+-	if test -r ${withval}/png.h ; then
+-	    CPPFLAGS="$CPPFLAGS -I${withval}"
+-	else
+-	    if test -r ${withval}/include/png.h ; then
+-		CPPFLAGS="$CPPFLAGS -I${withval}/include"
+-	    else
+-		AC_MSG_ERROR(Could not find png.h in ${withval})
+-	    fi
+-	fi
++if test -d ${withval} ; then
++    if test -r ${withval}/png.h ; then
++        CPPFLAGS="${CPPFLAGS} -I${withval}"
++        LDFLAGS="-L${withval} ${LDFLAGS}"
+     else
+-	AC_MSG_RESULT(not found)
+-	AC_MSG_ERROR(Couldn't find the specified png dir: ${withval})
++        CPPFLAGS="${CPPFLAGS} -I${withval}/include"
++        LDFLAGS="-L${withval}/lib ${LDFLAGS}"
+     fi
+-dnl Now we think we got it so lets check 
+-   AC_TRY_LINK([#include<stdio.h>
+-		 #include "png.h"], 
+-		 [png_read_data(NULL, NULL, 0)], 
+-		 [AC_DEFINE(HAVE_PNG)
+-		  AC_MSG_RESULT(got it)
+-		  have_png="yes"],
+-		 [AC_MSG_RESULT(not found)
+-		  AC_MSG_ERROR(Couldn't find png stuff in ${withval})])
+-],
+-[
+-AC_MSG_RESULT(not found)
+-have_png='no'
+-])
+-else
+-have_png='no'
+-fi
+-
+-if test "${have_png}" = "no" ; then 
+-    echo ""
+-    echo "Uh oh, you didn't include png.  This will allow Mosaic to "
+-    echo "view png images.  You can get it here:"
+-    echo "ftp://ftp.uu.net/graphics/png/src"
+-    echo "Before you run out and get it you will also need libz which can be"
+-    echo "found in the same place."
+-    echo ""
+-    echo "If you go get and build these things, putting png support into mosaic"
+-    echo "is as simple as doing this: "
+-    echo "./configure --with-pngdir=/where/you/installed/png --with-zdir=/where/you/installed/zlib"
+-    echo ""
+-    echo "Or you can just fill in the appropriate fields in the config script"
+-    echo "and to this:"
+-    echo "./config"
+-    echo ""
+-    echo "Would you like to configure to stop now so you can go get png/zlib?"
+-    echo "(yes or no)" 
+-
+-    read ans 
+-
+-    case "${ans}" in
+-	"y" | "ye" | "yes")
+-	exit
+-	;;
+-    esac    
+ fi
+ 
++AC_CHECK_LIB(png, png_read_info,
++    [AC_DEFINE(HAVE_PNG)
++     LIBS="${LIBS} -lpng"],
++    [AC_MSG_ERROR(Could not find png)])
++
++AC_CHECK_LIB(z, inflate,
++    [LIBS="${LIBS} -lz"],
++    [AC_MSG_ERROR(Could not find libz)])
++])
+ 
+ dnl AC_ARG_WITH(waisdir,
+ dnl [  --with-waisdir=DIR   the directory where the built wais library resides dnl ],
+diff -up Mosaic-src/libhtmlw/HTML-PSformat.c.compile Mosaic-src/libhtmlw/HTML-PSformat.c
+--- Mosaic-src/libhtmlw/HTML-PSformat.c.compile	1996-06-27 01:36:53.000000000 +0200
++++ Mosaic-src/libhtmlw/HTML-PSformat.c	2009-03-29 16:31:24.020878980 +0200
+@@ -59,7 +59,7 @@
+  *
+  */
+ #include "../config.h"
+-#include <varargs.h>
++#include <stdarg.h>
+ 
+ #include <string.h>
+ #include <stdio.h>
+@@ -229,9 +229,7 @@ GetDpi(HTMLWidget hw)
+  *
+  */
+ static int 
+-PSprintf(format, va_alist)
+-    char* format;
+-    va_dcl
++PSprintf(char *format, ...)
+ {
+     int 	len;
+     char 	*s;
+@@ -251,7 +249,7 @@ PSprintf(format, va_alist)
+ 	}
+ 	PS_string = s;
+     }
+-    va_start(args);
++    va_start(args, format);
+     len = vsprintf(PS_string+PS_len, format, args);
+     /* this is a hack to make it work on systems were vsprintf(s,...)
+      * returns s, instead of the len.
+diff -up Mosaic-src/libnut/system.c.compile Mosaic-src/libnut/system.c
+--- Mosaic-src/libnut/system.c.compile	1996-06-27 03:08:52.000000000 +0200
++++ Mosaic-src/libnut/system.c	2009-03-29 16:31:24.022883077 +0200
+@@ -102,10 +102,12 @@ extern char *strdup(char *str);
+ #endif
+ 
+ #ifndef VMS
++#if __GLIBC__ && __GLIBC__ < 2
+ extern int sys_nerr;
+ extern char *sys_errlist[];
+ extern int errno;
+ #endif
++#endif
+ 
+ 
+ #ifndef DISABLE_TRACE
+diff -up Mosaic-src/libnut/url-utils.c.compile Mosaic-src/libnut/url-utils.c
+--- Mosaic-src/libnut/url-utils.c.compile	1996-06-27 03:08:53.000000000 +0200
++++ Mosaic-src/libnut/url-utils.c	2009-03-29 16:31:24.082884586 +0200
+@@ -164,6 +164,7 @@ int rind(char *s, char c) {
+ }
+ 
+ 
++#ifdef NO_GETLINE
+ int getline(char *s, int n, FILE *f) {
+     register int i=0;
+ 
+@@ -180,6 +181,7 @@ int getline(char *s, int n, FILE *f) {
+         ++i;
+     }
+ }
++#endif
+ 
+ 
+ void send_fd(FILE *f, FILE *fd)
+diff -up Mosaic-src/libnut/url-utils.h.compile Mosaic-src/libnut/url-utils.h
+--- Mosaic-src/libnut/url-utils.h.compile	1995-11-22 00:03:03.000000000 +0100
++++ Mosaic-src/libnut/url-utils.h	2009-03-29 16:31:24.084882702 +0200
+@@ -6,7 +6,9 @@ char x2c(char *what);
+ void unescape_url(char *url);
+ void plustospace(char *str);
+ int rind(char *s, char c);
++#ifdef NO_GETLINE
+ int getline(char *s, int n, FILE *f);
++#endif
+ void send_fd(FILE *f, FILE *fd);
+ int ind(char *s, char c);
+ void escape_shell_cmd(char *cmd);
+diff -up Mosaic-src/libwww2/HTInit.c.compile Mosaic-src/libwww2/HTInit.c
+--- Mosaic-src/libwww2/HTInit.c.compile	1996-06-27 02:22:34.000000000 +0200
++++ Mosaic-src/libwww2/HTInit.c	2009-03-29 16:31:24.086882184 +0200
+@@ -489,6 +489,7 @@ PUBLIC void HTFileInit NOARGS
+ 
+ #define MAX_STRING_LEN 256
+ 
++#ifdef NO_GETLINE
+ static int getline(char *s, int n, FILE *f) 
+ {
+   register int i=0;
+@@ -510,6 +511,7 @@ static int getline(char *s, int n, FILE 
+ 
+   /* NOTREACHED */
+ }
++#endif
+ 
+ static void getword(char *word, char *line, char stop, char stop2) 
+ {
+diff -up Mosaic-src/libwww2/HTTCP.c.compile Mosaic-src/libwww2/HTTCP.c
+--- Mosaic-src/libwww2/HTTCP.c.compile	1996-06-27 02:22:48.000000000 +0200
++++ Mosaic-src/libwww2/HTTCP.c	2009-03-29 16:31:24.040884199 +0200
+@@ -72,8 +72,10 @@ PRIVATE char *hostname=0;		/* The name o
+ extern int errno;
+ #endif /* errno */
+ 
++#if defined(__GLIBC__) && __GLIBC__ < 2
+ extern char *sys_errlist[];		/* see man perror on cernvax */
+ extern int sys_nerr;
++#endif
+ 
+ /*	Report Internet Error
+ **	---------------------
+diff -up Mosaic-src/src/comment.c.compile Mosaic-src/src/comment.c
+--- Mosaic-src/src/comment.c.compile	1996-06-27 00:56:41.000000000 +0200
++++ Mosaic-src/src/comment.c	2009-03-29 16:31:24.042879972 +0200
+@@ -62,6 +62,7 @@
+ #include "../config.h"
+ #include "mosaic.h"
+ #include "gui.h"
++#define COMMENT_C
+ #include "comment.h"
+ 
+ 
+diff -up Mosaic-src/src/comment.h.compile Mosaic-src/src/comment.h
+--- Mosaic-src/src/comment.h.compile	1996-06-06 22:01:43.000000000 +0200
++++ Mosaic-src/src/comment.h	2009-03-29 16:31:24.045883497 +0200
+@@ -67,6 +67,7 @@
+ #ifndef _COMMENT_H
+ #define _COMMENT_H
+ 
++#ifdef COMMENT_C
+ char *comment_card_html_top= \
+ "<title>\n" \
+ "	Comment Card for Mosaic 2.6\n" \
+@@ -293,6 +294,7 @@ char *comment_card_html_bot= \
+ "\n" \
+ "</form>\n" \
+ "\n";
++#endif /* COMMENT_C */
+ 
+ #endif
+ 
+diff -up Mosaic-src/src/gui-dialogs.c.compile Mosaic-src/src/gui-dialogs.c
+--- Mosaic-src/src/gui-dialogs.c.compile	1996-07-18 09:49:41.000000000 +0200
++++ Mosaic-src/src/gui-dialogs.c	2009-03-29 16:31:24.049878607 +0200
+@@ -87,9 +87,11 @@ extern int is_uncompressed;
+ 
+ /*swp -- for ~ expansion*/
+ #include <pwd.h>
++#if __GLIBC__ && __GLIBC__ < 2
+ extern int sys_nerr;
+ extern char *sys_errlist[];
+ extern int errno;
++#endif
+ #define __MAX_HOME_LEN__ 256
+ int pathEval(char *dest, char *src);
+ char *getFileName(char *file_src);
+diff -up Mosaic-src/src/Makefile.in.compile Mosaic-src/src/Makefile.in
+--- Mosaic-src/src/Makefile.in.compile	1996-06-28 07:42:15.000000000 +0200
++++ Mosaic-src/src/Makefile.in	2009-03-29 16:31:24.052880378 +0200
+@@ -199,7 +199,7 @@ cciBindings2.o: mosaic.h ../libXmx/Xmx.h
+ cciBindings2.o: toolbar.h prefs.h prefs_defs.h gui.h cci.h port.h
+ cciBindings2.o: cciBindings2.h cciServer.h list.h memStuffForPipSqueeks.h
+ cciBindings2.o: ../libwww2/HTFormat.h ../libwww2/HTUtils.h
+-cciBindings2.o: ../libwww2/HTString.h /usr/include/stdarg.h
++cciBindings2.o: ../libwww2/HTString.h
+ cciBindings2.o: ../libwww2/HTStream.h ../libwww2/HTAtom.h ../libwww2/HTList.h
+ cciBindings2.o: ../libwww2/HTAnchor.h
+ 
+@@ -207,7 +207,7 @@ support.o: cci.h port.h
+ 
+ bla.o: cciServer.h cci.h port.h list.h
+ bla.o: memStuffForPipSqueeks.h ../libwww2/HTPlain.h ../libwww2/HTStream.h
+-bla.o: ../libwww2/HTUtils.h ../libwww2/HTString.h /usr/include/stdarg.h
++bla.o: ../libwww2/HTUtils.h ../libwww2/HTString.h
+ bla.o: ../libwww2/HTAnchor.h ../libwww2/HTList.h ../libwww2/HTAtom.h 
+ bla.o: ../libwww2/HTFormat.h ../libwww2/HText.h ../libwww2/HTFile.h 
+ bla.o: ../libwww2/HTAccess.h ../libwww2/tcp.h ../libwww2/HTML.h
+diff -up Mosaic-src/src/readPNG.c.compile Mosaic-src/src/readPNG.c
+--- Mosaic-src/src/readPNG.c.compile	1996-06-30 14:30:00.000000000 +0200
++++ Mosaic-src/src/readPNG.c	2009-03-29 16:31:24.055883413 +0200
+@@ -126,13 +126,13 @@ ReadPNG(FILE *infile,int *width, int *he
+     rewind(infile);
+ 
+         /* allocate the structures */
+-    png_ptr = (png_struct *)malloc(sizeof(png_struct));
++    png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+     if(!png_ptr)
+         return 0;
+ 
+     info_ptr = (png_info *)malloc(sizeof(png_info));
+     if(!info_ptr) {
+-        free(png_ptr);
++        png_destroy_read_struct(&png_ptr, NULL, NULL);
+         return 0;
+     }
+ 
+@@ -145,25 +145,20 @@ ReadPNG(FILE *infile,int *width, int *he
+         }
+ #endif
+ 
+-        png_read_destroy(png_ptr, info_ptr, (png_info *)0); 
++        png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+ 
+         if(png_pixels != NULL)
+             free((char *)png_pixels);
+         if(row_pointers != NULL)
+             free((png_byte **)row_pointers);
+-                
+-        free((char *)png_ptr);
+-        free((char *)info_ptr);
++
++        png_destroy_read_struct(&png_ptr, &info_ptr, NULL);                
+         
+         return 0;
+     }
+ 
+-    /* SWP -- Hopefully to fix cores on bad PNG files */
+-    png_set_message_fn(png_ptr,png_get_msg_ptr(png_ptr),NULL,NULL); 
+-
+-        /* initialize the structures */
++        /* initialize the structure */
+     png_info_init(info_ptr);
+-    png_read_init(png_ptr);
+     
+         /* set up the input control */
+     png_init_io(png_ptr, infile);
+@@ -409,12 +404,7 @@ ReadPNG(FILE *infile,int *width, int *he
+     free((png_byte **)row_pointers);
+     
+         /* clean up after the read, and free any memory allocated */
+-    png_read_destroy(png_ptr, info_ptr, (png_info *)0);
+-    
+-
+-        /* free the structures */
+-    free((char *)png_ptr);
+-    free((char *)info_ptr);
++    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+     
+     return pixmap;
+ }

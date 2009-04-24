@@ -1,0 +1,29 @@
+Skip <script> tags, for the cases where careless authors don't comment its content out.
+Lubomir Rintel <lkundrak@v3.sk>
+
+--- Mosaic-src.orig/libhtmlw/HTMLparse.c	1996-06-27 01:37:04.000000000 +0200
++++ Mosaic-src/libhtmlw/HTMLparse.c	2008-11-28 19:04:50.000000000 +0100
+@@ -622,7 +622,7 @@ get_mark(start, endp)
+ 	}
+ 
+ 	/* amb - check if we are in a comment, start tag is <!-- */
+-	if (strncmp (start, "<!--", 4)==0)
++	if (strncmp (start, "<!--", 4)==0 || strncasecmp (start, "<script", 7)==0)
+ 	  comment=1;
+ 
+ 	start++;
+@@ -652,9 +652,12 @@ get_mark(start, endp)
+ 	      {
+ 		if ( (*ptr == '>') && (!first_gt) )
+ 		  first_gt = ptr;
+-		if (strncmp (ptr, "--", 2) == 0)   /* found double dash (--) */
++		if (strncmp (ptr, "--", 2) == 0 || strncasecmp (ptr, "</script", 8) == 0)   /* found double dash (--) */
+ 		  {
+-		    ptr += 2;
++                    if (ptr[0] == '-')
++		      ptr += 2;
++                    else
++                      ptr += 8;
+ 		    while ((*ptr != '\0') && ((*ptr == ' ') || (*ptr == '\n')
+ 					      || (*ptr == '-') ))
+ 		      ptr++;                   /* skip spaces and newlines */ 

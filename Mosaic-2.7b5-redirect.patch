@@ -1,0 +1,46 @@
+Fix relative redirects, for sites such as microsoft.com
+Martin Nagy <mnagy@redhat.com>
+
+diff -up Mosaic-src/libwww2/HTMIME.c.redirect Mosaic-src/libwww2/HTMIME.c
+--- Mosaic-src/libwww2/HTMIME.c.redirect	2008-11-29 05:04:46.000000000 +0100
++++ Mosaic-src/libwww2/HTMIME.c	2008-11-29 05:07:13.000000000 +0100
+@@ -658,8 +658,37 @@ PRIVATE void HTMIME_put_character ARGS2(
+ #endif
+ 		break;
+             case LOCATION:
+-		me->location = me->value;
+-		redirecting_url = strdup (me->location);
++		if (me->value[0] == '/' && me->anchor != NULL && me->anchor->address != NULL) {
++			char *tmp;
++			char *end;
++			int len;
++			int value_len;
++
++			/* Skip the protocol name */
++			tmp = strstr(me->anchor->address, "://");
++			if (tmp != NULL)
++				tmp += 3;
++			else
++				tmp = me->anchor->address;
++			end = strchr(tmp, '/');
++			tmp = me->anchor->address;
++			if (end != NULL)
++				len = end - tmp;
++			else
++				len = strlen(tmp);
++
++			value_len = strlen(me->value);
++
++			redirecting_url = malloc(sizeof(char) * (len + value_len + 1));
++			strncpy(redirecting_url, tmp, len);
++			strncpy(redirecting_url + len, me->value, value_len);
++			redirecting_url[len + value_len] = '\0';
++
++			me->location = strdup (redirecting_url);
++		} else {
++			me->location = me->value;
++			redirecting_url = strdup (me->location);
++		}
+ #ifndef DISABLE_TRACE
+ 		if (www2Trace)
+ 			fprintf(stderr,

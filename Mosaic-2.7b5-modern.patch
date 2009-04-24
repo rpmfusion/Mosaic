@@ -1,0 +1,133 @@
+Various fixes & hacks to make it understand today's web pages. (2008-11-27)
+Lubomir Rintel <lkundrak@v3.sk>
+
+HTMIME.c
+	Chuck ;charset=..., which would make us not understand the mime type.
+	We don't do any charset conversions anyways.
+
+HTInit.c
+	Accept XHTML as HTML.
+
+HTMLformat.c
+	Don't terminate head on junk tags such as META or STYLE.
+	They're better hidden if we don't grok them.
+
+HTMLparse.c
+	Accept singly quoted argument values.
+
+--- Mosaic-src.orig/libwww2/HTMIME.c	1996-06-27 02:22:36.000000000 +0200
++++ Mosaic-src/libwww2/HTMIME.c	2008-11-27 21:24:06.000000000 +0100
+@@ -569,11 +569,14 @@ PRIVATE void HTMIME_put_character ARGS2(
+               if (www2Trace)
+                 fprintf (stderr, "[MIME_put_char] Got content-type value '%s'\n", me->value);
+ #endif
+-              /* Lowercase it. */
++              /* Lowercase it and strip charset. */
+               {
+                 char *tmp;
+                 for (tmp = me->value; *tmp; tmp++)
+-                  *tmp = TOLOWER (*tmp);
++                  if (*tmp == ';')
++                    *tmp = '\0';
++                  else
++                    *tmp = TOLOWER (*tmp);
+               }
+ #ifndef DISABLE_TRACE
+               if (www2Trace)
+--- Mosaic-src.orig/libwww2/HTInit.c	1996-06-27 02:22:34.000000000 +0200
++++ Mosaic-src/libwww2/HTInit.c	2008-11-27 21:30:34.000000000 +0100
+@@ -56,6 +56,12 @@ PUBLIC void HTFormatInit NOARGS
+   HTSetConversion("text/plain", "www/present", HTPlainPresent,	1.0, 0.0, 0.0);
+   HTSetConversion("application/x-wais-source", "*", HTWSRCConvert, 1.0, 0.0, 0.0);
+ 
++  /* XHTML */
++  HTSetConversion("text/xhtml", "www/present", HTMosaicHTMLPresent, 1.0, 0.0, 0.0);
++  HTSetConversion("text/xhtml+xml", "www/present", HTMosaicHTMLPresent, 1.0, 0.0, 0.0);
++  HTSetConversion("application/xhtml", "www/present", HTMosaicHTMLPresent, 1.0, 0.0, 0.0);
++  HTSetConversion("application/xhtml+xml", "www/present", HTMosaicHTMLPresent, 1.0, 0.0, 0.0);
++
+   /* These should override everything else. */
+   HTLoadTypesConfigFile (personal_type_map);
+ 
+--- Mosaic-src.orig/libhtmlw/HTMLformat.c	1996-07-18 09:49:26.000000000 +0200
++++ Mosaic-src/libhtmlw/HTMLformat.c	2008-11-28 10:02:14.000000000 +0100
+@@ -3448,16 +3448,6 @@ TriggerMarkChanges(hw, mptr, x, y)
+ 	type = mark->type;
+ 	font = NULL;
+ 
+-	/* If we are not in a tag that belongs in the HEAD, end the HEAD
+-	   section  - amb */
+-	if (InDocHead)
+-	  if ((type != M_TITLE)&&(type != M_NONE)&&(type != M_BASE)&&
+-	      (type != M_INDEX)&&(type != M_COMMENT))
+-	      {
+-		Ignore = 0;
+-		InDocHead = 0;
+-	      }
+-	
+ 	/*
+ 	 * If Ignore is set, we ignore all further elements until we get to the
+ 	 * end of the Ignore
+--- Mosaic-src.orig/libhtmlw/HTMLparse.c	1996-06-27 01:37:04.000000000 +0200
++++ Mosaic-src/libhtmlw/HTMLparse.c	2008-11-28 10:35:49.000000000 +0100
+@@ -1436,10 +1436,12 @@ AnchorTag(ptrp, startp, endp)
+ 	char *ptr;
+ 	char *start;
+ 	char tchar;
+-	int quoted;
++	int double_quoted;
++	int single_quoted;
+ 	int has_value;
+ 
+-	quoted = 0;
++	double_quoted = 0;
++	single_quoted = 0;
+ 
+ 	/*
+ 	 * remove leading spaces, and set start
+@@ -1508,7 +1510,13 @@ AnchorTag(ptrp, startp, endp)
+ 
+ 	if (*ptr == '\"')
+ 	{
+-		quoted = 1;
++		double_quoted = 1;
++		ptr++;
++	}
++
++	if (*ptr == '\'')
++	{
++		single_quoted = 1;
+ 		ptr++;
+ 	}
+ 
+@@ -1516,13 +1524,20 @@ AnchorTag(ptrp, startp, endp)
+ 	/*
+ 	 * Get tag value.  Either a quoted string or a single word
+ 	 */
+-	if (quoted)
++	if (double_quoted)
+ 	{
+ 		while ((*ptr != '\"')&&(*ptr != '\0'))
+ 		{
+ 			ptr++;
+ 		}
+ 	}
++	else if (single_quoted)
++	{
++		while ((*ptr != '\'')&&(*ptr != '\0'))
++		{
++			ptr++;
++		}
++	}
+ 	else
+ 	{
+ 		while ((!isspace((int)*ptr))&&(*ptr != '\0'))
+@@ -1564,7 +1579,7 @@ AnchorTag(ptrp, startp, endp)
+ 
+ 	/* If you forgot the end quote, you need to make sure you aren't
+ 		indexing ptr past the end of its own array -- SWP */
+-	if (quoted && *ptr!='\0')
++	if ((single_quoted || double_quoted) && *ptr!='\0')
+ 	{
+ 		ptr++;
+ 	}

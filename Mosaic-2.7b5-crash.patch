@@ -1,0 +1,16 @@
+JPEG closes frees FILE pointer upon unsuccessfull load, don't free it again.
+Lubomir Rintel <lkundrak@v3.sk>
+
+--- Mosaic-src.orig/src/picread.c	1996-06-27 00:57:12.000000000 +0200
++++ Mosaic-src/src/picread.c	2008-11-28 18:15:03.000000000 +0100
+@@ -702,6 +702,10 @@ int *bg;
+ 		    if (fp != stdin) fclose(fp);
+ 		    return(bit_data);
+ 		}
++            else
++                {
++                    fp = NULL;
++                }
+ #endif
+ 
+ 	}
