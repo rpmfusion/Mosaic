@@ -1,6 +1,6 @@
 Name:           Mosaic
 Version:        2.7
-Release:        0.3.b5%{?dist}
+Release:        0.4.b5%{?dist}
 Summary:        Web Browser
 
 Group:          Applications/Internet
@@ -87,6 +87,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Feb 09 2012 Nicolas Chauvet <kwizart@gmail.com> - 2.7-0.4.b5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
 * Thu Apr 23 2009 Lubomir Rintel <lkundrak@v3.sk> - 2.7-0.3.b5
 - Grammar fixes
 - Fix buildrequires
