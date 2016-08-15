@@ -476,9 +476,6 @@ diff -up Mosaic-src/src/Makefile.in.compile Mosaic-src/src/Makefile.in
  bla.o: ../libwww2/HTAnchor.h ../libwww2/HTList.h ../libwww2/HTAtom.h 
  bla.o: ../libwww2/HTFormat.h ../libwww2/HText.h ../libwww2/HTFile.h 
  bla.o: ../libwww2/HTAccess.h ../libwww2/tcp.h ../libwww2/HTML.h
-diff -up Mosaic-src/src/readPNG.c.compile Mosaic-src/src/readPNG.c
---- Mosaic-src/src/readPNG.c.compile	1996-06-30 14:30:00.000000000 +0200
-+++ Mosaic-src/src/readPNG.c	2009-03-29 16:31:24.055883413 +0200
 --- a/src/readPNG.c
 +++ b/src/readPNG.c
 @@ -126,18 +128,18 @@
