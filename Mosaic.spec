@@ -1,6 +1,6 @@
 Name:           Mosaic
 Version:        2.7
-Release:        0.4.b5%{?dist}
+Release:        0.5.b5%{?dist}
 Summary:        Web Browser
 
 Group:          Applications/Internet
@@ -15,13 +15,9 @@ Patch2:         Mosaic-2.7b5-crash.patch
 Patch3:         Mosaic-2.7b5-script.patch
 Patch4:         Mosaic-2.7b5-hash_url.patch
 Patch5:         Mosaic-2.7b5-redirect.patch
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Patch6:         Mosaic-2.7b5-gcc-compile.patch
 
-%if 0%{?rhel}
 BuildRequires:  openmotif-devel
-%else
-BuildRequires:  lesstif-devel
-%endif
 BuildRequires:  libjpeg-devel libpng-devel
 BuildRequires:  autoconf ImageMagick desktop-file-utils
 BuildRequires:  libXmu-devel
@@ -40,7 +36,7 @@ displaying images inline with text.
 %patch3 -p1 -b .script
 %patch4 -p1 -b .hash_url
 %patch5 -p1 -b .redirect
-
+%patch6 -p1 -b .gcc
 
 %build
 autoconf
@@ -73,20 +69,20 @@ desktop-file-install %{SOURCE1} \
     --dir=$RPM_BUILD_ROOT%{_datadir}/applications
 
 
-%clean
-rm -rf $RPM_BUILD_ROOT
-
-
 %files
-%defattr(-,root,root,-)
+%doc README.resources.html
+%doc CHANGES FEATURES INSTALL README
+%license COPYRIGHT
 %{_bindir}/Mosaic
 %{_datadir}/pixmaps/Mosaic.png
 %{_datadir}/applications/Mosaic.desktop
-%doc CHANGES COPYRIGHT FEATURES INSTALL README
-%doc README.resources.html
 
 
 %changelog
+* Mon Aug 15 2016 Leigh Scott <leigh123linux@googlemail.com> - 2.7-0.5.b5
+- Patch for libpng changes
+- Patch for gcc changes
+
 * Thu Feb 09 2012 Nicolas Chauvet <kwizart@gmail.com> - 2.7-0.4.b5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
 
