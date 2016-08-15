@@ -1,6 +1,6 @@
 Name:           Mosaic
 Version:        2.7
-Release:        0.6.b5%{?dist}
+Release:        0.5.b5%{?dist}
 Summary:        Web Browser
 
 Group:          Applications/Internet
@@ -20,9 +20,7 @@ Patch6:         Mosaic-2.7b5-gcc-compile.patch
 BuildRequires:  openmotif-devel
 BuildRequires:  libjpeg-devel libpng-devel
 BuildRequires:  autoconf ImageMagick desktop-file-utils
-BuildRequires:  libXmu-devel libXpm-devel
-
-Requires:  xv
+BuildRequires:  libXmu-devel
 
 %description
 Mosaic is a web browser and client for protocols such as FTP, Usenet, and
@@ -81,10 +79,6 @@ desktop-file-install %{SOURCE1} \
 
 
 %changelog
-* Mon Aug 15 2016 Leigh Scott <leigh123linux@googlemail.com> - 2.7-0.6.b5
-- Add build requires libXpm-devel
-- Add requires xv
-
 * Mon Aug 15 2016 Leigh Scott <leigh123linux@googlemail.com> - 2.7-0.5.b5
 - Patch for libpng changes
 - Patch for gcc changes
