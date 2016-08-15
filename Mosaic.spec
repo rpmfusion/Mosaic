@@ -21,6 +21,7 @@ BuildRequires:  openmotif-devel
 BuildRequires:  libjpeg-devel libpng-devel
 BuildRequires:  autoconf ImageMagick desktop-file-utils
 BuildRequires:  libXmu-devel
+Requires:  xv
 
 %description
 Mosaic is a web browser and client for protocols such as FTP, Usenet, and
@@ -82,6 +83,7 @@ desktop-file-install %{SOURCE1} \
 * Mon Aug 15 2016 Leigh Scott <leigh123linux@googlemail.com> - 2.7-0.5.b5
 - Patch for libpng changes
 - Patch for gcc changes
+- Add Requires xv
 
 * Thu Feb 09 2012 Nicolas Chauvet <kwizart@gmail.com> - 2.7-0.4.b5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
