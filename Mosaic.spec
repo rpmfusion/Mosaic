@@ -1,6 +1,6 @@
 Name:           Mosaic
 Version:        2.7
-Release:        0.5.b5%{?dist}
+Release:        0.6.b5%{?dist}
 Summary:        Web Browser
 
 Group:          Applications/Internet
@@ -16,6 +16,7 @@ Patch3:         Mosaic-2.7b5-script.patch
 Patch4:         Mosaic-2.7b5-hash_url.patch
 Patch5:         Mosaic-2.7b5-redirect.patch
 Patch6:         Mosaic-2.7b5-gcc-compile.patch
+Patch7:         Mosaic-2.7b5-Paths.patch
 
 BuildRequires:  openmotif-devel
 BuildRequires:  libjpeg-devel libpng-devel
@@ -38,6 +39,7 @@ displaying images inline with text.
 %patch4 -p1 -b .hash_url
 %patch5 -p1 -b .redirect
 %patch6 -p1 -b .gcc
+%patch7 -p1 -b .paths
 
 %build
 autoconf
@@ -71,7 +73,8 @@ desktop-file-install %{SOURCE1} \
 
 
 %files
-%doc README.resources.html
+%doc README.resources.html mosaic-user-defs
+%doc mosaic-imageselect-sites mosaic-spoof-agents
 %doc CHANGES FEATURES INSTALL README
 %license COPYRIGHT
 %{_bindir}/Mosaic
@@ -80,6 +83,9 @@ desktop-file-install %{SOURCE1} \
 
 
 %changelog
+* Tue Aug 30 2016 Leigh Scott <leigh123linux@googlemail.com> - 2.7-0.6.b5
+- Fix hardcoded paths
+
 * Mon Aug 15 2016 Leigh Scott <leigh123linux@googlemail.com> - 2.7-0.5.b5
 - Patch for libpng changes
 - Patch for gcc changes

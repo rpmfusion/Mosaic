@@ -1,0 +1,46 @@
+--- a/src/xresources.h
++++ b/src/xresources.h
+@@ -263,7 +265,7 @@
+ 
+   { "documentsMenuSpecfile", "DocumentsMenuSpecfile", XtRString, sizeof (char *),
+       offset (documents_menu_specfile), XtRString, 
+-      "/usr/local/lib/mosaic/documents.menu" },
++      "~/.local/share/mosaic/documents.menu" },
+ 
+   { "reloadReloadsImages", "ReloadReloadsImages", XtRBoolean, sizeof (Boolean),
+       offset (reload_reloads_images), XtRString, "False" },
+@@ -477,11 +486,11 @@
+ 
+   { "proxySpecfile", "ProxySpecfile", XtRString, sizeof (char *),
+       offset (proxy_specfile), XtRString, 
+-      "/usr/local/lib/mosaic/proxy" },
++      "~/.local/share/mosaic/proxy" },
+ 
+   { "noproxySpecfile", "NoproxySpecfile", XtRString, sizeof (char *),
+       offset (noproxy_specfile), XtRString, 
+-      "/usr/local/lib/mosaic/no_proxy" },
++      "~/.local/share/mosaic/no_proxy" },
+   
+   { "useScreenGamma", "UseScreenGamma", XtRBoolean, sizeof (Boolean),
+       offset (useScreenGamma), XtRString, "False" },
+
+--- a/src/mosaic.h
++++ b/src/mosaic.h
+@@ -170,14 +170,14 @@
+ 
+ #ifndef DOCUMENTS_MENU_SPECFILE
+ #define DOCUMENTS_MENU_SPECFILE \
+-  "/usr/local/lib/mosaic/documents.menu"
++  "~/.local/share/mosaic/documents.menu"
+ #endif /* not DOCUMENTS_MENU_SPECFILE */
+ 
+ #ifndef GLOBAL_EXTENSION_MAP
+-#define GLOBAL_EXTENSION_MAP "/usr/local/lib/mosaic/mime.types"
++#define GLOBAL_EXTENSION_MAP "~/.local/share/mosaic/mime.types"
+ #endif
+ #ifndef GLOBAL_TYPE_MAP
+-#define GLOBAL_TYPE_MAP "/usr/local/lib/mosaic/mailcap"
++#define GLOBAL_TYPE_MAP "~/.local/share/mosaic/mailcap"
+ #endif
+ 
+ 
