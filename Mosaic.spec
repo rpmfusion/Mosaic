@@ -1,6 +1,6 @@
 Name:           Mosaic
 Version:        2.7
-Release:        0.6.b5%{?dist}
+Release:        0.7.b5%{?dist}
 Summary:        Web Browser
 
 Group:          Applications/Internet
@@ -83,6 +83,9 @@ desktop-file-install %{SOURCE1} \
 
 
 %changelog
+* Sat Mar 25 2017 RPM Fusion Release Engineering <kwizart@rpmfusion.org> - 2.7-0.7.b5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
+
 * Tue Aug 30 2016 Leigh Scott <leigh123linux@googlemail.com> - 2.7-0.6.b5
 - Fix hardcoded paths
 
