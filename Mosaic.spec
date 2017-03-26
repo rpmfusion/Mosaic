@@ -1,6 +1,6 @@
 Name:           Mosaic
 Version:        2.7
-Release:        0.7.b5%{?dist}
+Release:        0.8.b5%{?dist}
 Summary:        Web Browser
 
 Group:          Applications/Internet
@@ -17,6 +17,9 @@ Patch4:         Mosaic-2.7b5-hash_url.patch
 Patch5:         Mosaic-2.7b5-redirect.patch
 Patch6:         Mosaic-2.7b5-gcc-compile.patch
 Patch7:         Mosaic-2.7b5-Paths.patch
+
+# Mosaic fails to build on i686 and probably others arches
+ExclusiveArch: x86_64
 
 BuildRequires:  openmotif-devel
 BuildRequires:  libjpeg-devel libpng-devel
@@ -83,6 +86,9 @@ desktop-file-install %{SOURCE1} \
 
 
 %changelog
+* Sun Mar 26 2017 Nicolas Chauvet <kwizart@gmail.com> - 2.7-0.8.b5
+- ExclusiveArch x86_64
+
 * Sat Mar 25 2017 RPM Fusion Release Engineering <kwizart@rpmfusion.org> - 2.7-0.7.b5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 
