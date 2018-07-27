@@ -1,6 +1,6 @@
 Name:           Mosaic
 Version:        2.7
-Release:        0.10.b5%{?dist}
+Release:        0.11.b5%{?dist}
 Summary:        Web Browser
 
 Group:          Applications/Internet
@@ -86,6 +86,9 @@ desktop-file-install %{SOURCE1} \
 
 
 %changelog
+* Fri Jul 27 2018 RPM Fusion Release Engineering <sergio@serjux.com> - 2.7-0.11.b5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
+
 * Fri Mar 02 2018 RPM Fusion Release Engineering <leigh123linux@googlemail.com> - 2.7-0.10.b5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
 
