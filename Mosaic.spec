@@ -18,9 +18,9 @@ Patch5:         Mosaic-2.7b5-redirect.patch
 Patch6:         Mosaic-2.7b5-gcc-compile.patch
 Patch7:         Mosaic-2.7b5-Paths.patch
 
-# Mosaic fails to build on i686 and probably others arches
-ExclusiveArch: x86_64
+ExclusiveArch:  i686 x86_64
 
+BuildRequires:  gcc
 BuildRequires:  openmotif-devel
 BuildRequires:  libjpeg-devel libpng-devel
 BuildRequires:  autoconf ImageMagick desktop-file-utils
@@ -47,6 +47,8 @@ displaying images inline with text.
 %build
 autoconf
 %configure --with-png --with-jpeg
+# we might should not use _smp_mflags sometimes libwww2 start building first than
+# libwww and build fails.
 make %{?_smp_mflags}
 
 # Convert the icon into Icon Theme Specification compilant one
@@ -88,6 +90,8 @@ desktop-file-install %{SOURCE1} \
 %changelog
 * Fri Jul 27 2018 RPM Fusion Release Engineering <sergio@serjux.com> - 2.7-0.11.b5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
+- BR gcc
+- Add i686 to ExclusiveArch
 
 * Fri Mar 02 2018 RPM Fusion Release Engineering <leigh123linux@googlemail.com> - 2.7-0.10.b5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
