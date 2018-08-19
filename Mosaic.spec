@@ -1,6 +1,6 @@
 Name:           Mosaic
 Version:        2.7
-Release:        0.11.b5%{?dist}
+Release:        0.12.b5%{?dist}
 Summary:        Web Browser
 
 Group:          Applications/Internet
@@ -88,6 +88,9 @@ desktop-file-install %{SOURCE1} \
 
 
 %changelog
+* Sun Aug 19 2018 RPM Fusion Release Engineering <leigh123linux@gmail.com> - 2.7-0.12.b5
+- Rebuilt for Fedora 29 Mass Rebuild binutils issue
+
 * Fri Jul 27 2018 RPM Fusion Release Engineering <sergio@serjux.com> - 2.7-0.11.b5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 - BR gcc
